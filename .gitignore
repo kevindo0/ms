@@ -1,1 +1,11 @@
+# *.pyc
+*.log
+*.log*
+# __pycache__
+.idea
 venv
+config/config.yaml
+test
+k8s/devops/config/*.yaml
+k8s/devops/dev/*.yaml
+docker/devops/**/project/
