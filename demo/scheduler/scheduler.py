@@ -14,6 +14,7 @@ def my_listener(event):
 	if event.exception:
 		print("task is error", event.exception)
 		# print("task is error", event.exception, event.traceback)
+		# 出错进行邮件发送等操作
 	else:
 		print('task is ok!')
 
