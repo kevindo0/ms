@@ -1,8 +1,6 @@
 from flask import Flask
 from dynaconf import settings
 
-print(dir(settings))
-
 def _register_blueprint(app):
     from apps.ptest.views import test_bp
     
