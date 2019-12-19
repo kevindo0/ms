@@ -4,3 +4,6 @@ db_port = '3306'
 db_user = 'root'
 db_password = '123456'
 database = 'ms'
+
+log_dir = '/tmp'
+log_file = 'ms.log'
