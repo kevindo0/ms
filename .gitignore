@@ -5,6 +5,7 @@ __pycache__
 .idea
 venv
 config/config.yaml
+config/settings.toml
 test
 k8s/devops/config/*.yaml
 k8s/devops/dev/*.yaml
