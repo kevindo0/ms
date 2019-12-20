@@ -14,7 +14,7 @@ from apps.g.database import Base
 import apps.ptest.models
 target_metadata = Base.metadata
 # 创建数据迁移版本
-alembic revision –autogenerate -m "create_user_table"
+alembic revision –-autogenerate -m "create_user_table"
 # 更新数据库
 alembic upgrade _version
 # 更新到最新版

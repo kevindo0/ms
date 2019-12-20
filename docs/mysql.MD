@@ -1,5 +1,5 @@
 ### 1. 技巧
-1.删除外键约束
+#### 1.删除外键约束
 
 ```sql
 show create table project_approval;
@@ -20,15 +20,13 @@ CREATE TABLE `project_group` (
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8
 alter table project_approval drop FOREIGN key project_group_ibfk_1;
 ```
-
-2. ON DUPLICATE KEY UPDATE  
+#### 2. ON DUPLICATE KEY UPDATE  
 在insert语句后面带上ON DUPLICATE KEY UPDATE 子句，而要插入的行与表中现有记录的惟一索引或主键中产生重复值，那么就会发生旧行的更新；如果插入的行数据与现有表中记录的唯一索引或者主键不重复，则执行新纪录插入操作。
 
 ```sql
 INSERT into daily_hit_counter (day, slot, cnt) values ('2017-11-19', 1, 1) ON DUPLICATE KEY UPDATE cnt = cnt + 1;
 ```
-
-3. 导出表结构和表数据
+#### 3. 导出表结构和表数据
 ```sql
 mysqldump -u用戶名 -p密码 -d 数据库名 表名 > 脚本名; 
 -- 导出整个数据库结构和数据
@@ -43,13 +41,31 @@ mysqldump -h localhost -uroot -p123456  -d database > dump.sql
 -- 导出单个数据表结构（不包含数据）
 mysqldump -h localhost -uroot -p123456  -d database table > dump.sql
 ```
-4. 查询显示中文乱码
+#### 4. 查询显示中文乱码
 ```sql
 show variables like 'character%';
 set character_set_client = utf8;
 set character_set_connection = utf8;
 set character_set_results = utf8;
 set character_set_server = utf8;
+```
+#### 5. 索引
+```sql
+-- ALTER TABLE用来创建普通索引、UNIQUE索引或PRIMARY KEY索引。
+-- column_list指出对哪些列进行索引，多列时各列之间用逗号分隔
+ALTER TABLE table_name ADD INDEX index_name (column_list)
+ALTER TABLE table_name ADD UNIQUE (column_list)
+ALTER TABLE table_name ADD PRIMARY KEY (column_list)
+-- CREATE INDEX可对表增加普通索引或UNIQUE索引。
+CREATE INDEX index_name ON table_name (column_list)
+CREATE UNIQUE INDEX index_name ON table_name (column_list)
+-- 可利用ALTER TABLE或DROP INDEX语句来删除索引
+DROP INDEX index_name ON talbe_name
+ALTER TABLE table_name DROP INDEX index_name
+ALTER TABLE table_name DROP PRIMARY KEY
+-- 查看索引
+show index from tblname;
+show keys from tblname;
 ```
 
 ### 2. Error

@@ -1,11 +1,12 @@
+import os
 from contextlib import contextmanager
 from sqlalchemy import create_engine
-import os
 
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
-
 from dynaconf import settings
+
+from apps.g import logger
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,16 +18,30 @@ SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI, encoding='utf-8')
 
-db = sessionmaker(bind=engine)()
+Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 @contextmanager
 def db_session():
+    sess = Session()
     try:
-        yield db
-        db.commit()
+        yield sess
+        sess.commit()
     except Exception as ex:
-        db.rollback()
+        sess.rollback()
         raise exceptions.DatabaseError(info=ex)
     finally:
-        db.close()
+        sess.close()
+
+# scoped_session 线程安全
+@contextmanager
+def session():
+    sess = scoped_session(Session)()
+    try:
+        yield sess
+        sess.commit()
+    except Exception as ex:
+        sess.rollback()
+        logger.exception(ex)
+    finally:
+        sess.close()
