@@ -1,6 +1,7 @@
 *.pyc
 *.log
 *.log*
+*.pkl
 __pycache__
 .idea
 venv

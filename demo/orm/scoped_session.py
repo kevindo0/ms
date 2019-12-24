@@ -44,9 +44,9 @@ class Operation:
         self.get_c()
 
 def job(name):
-    s1 = Session()
-    s2 = Session()
-    print(name, id(s1), id(s2), s1 is s2)
+    # s1 = Session()
+    # s2 = Session()
+    # print(name, id(s1), id(s2), s1 is s2)
     session = Session()
     print(f"id session:{id(session)}")
     person = Person(name='frank-' + name, mobile='111111', id_card_number='123456789')
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     ope.info()
     thread_list = []
     # 创建5个线程
-    for i in range(5):
+    for i in range(100000):
         name = 'job' + str(i)
         t = threading.Thread(target=job, name=name, args=(name,))
         thread_list.append(t)
