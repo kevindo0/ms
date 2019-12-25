@@ -22,10 +22,21 @@ if __name__ == '__main__':
 	scheduler = BlockingScheduler()
 	# scheduler.add_job(tick, 'interval', seconds=8, args=['interval'])
 	# scheduler.add_job(tick, 'cron', minute=33, args=['cron'])
-	scheduler.add_job(tick_error, 'cron', second='*/5', args=['cron'])
+	scheduler.add_job(tick, 'cron', second='*/7', args=['cron'])
 	scheduler.add_listener(my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 	try:
+		print('server is start...')
 		scheduler.start()
 	except Exception as ex:
 		print("Error:", ex)
+
+"""
+second=“*/7”的执行结果：
+Tick! name: 【cron】 the time is: 2019-12-25 14:56:56.002336
+task is ok!
+Tick! name: 【cron】 the time is: 2019-12-25 14:57:00.005616
+task is ok!
+Tick! name: 【cron】 the time is: 2019-12-25 14:57:07.006720
+task is ok!
+"""
 		

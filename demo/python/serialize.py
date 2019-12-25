@@ -26,6 +26,7 @@ for person in person_list:
     print(f"{person.name} says \"{person.slogan}\"")
 print('-'*50)
 
+# 根据名称对person对象列表进行排序
 print("Sort the person_list by name and show ...")
 plist_sorted = sorted(person_list, key=operator.attrgetter('name'))
 for person in plist_sorted:
