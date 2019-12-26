@@ -13,9 +13,11 @@ import click
 @click.option('--count', default=1, help='Number of greetings.')
 @click.option('--name', prompt='Your name',
               help='The person to greet.')
-def hello(c, pwd, count, name):
+@click.option('--start', type=click.DateTime())
+def hello(c, pwd, count, name, start):
     print("c:", c)
     print("pwd:", pwd)
+    print('start:', start)
     for x in range(count):
         click.echo('Hello %s!' % name)
 
@@ -33,7 +35,23 @@ def initdb():
 def dropdb():
     click.echo('Dropped the database')
 
+# nargs : 表接收几个参数
+# python click_g.py a.txt b.txt c.txt d.txt e.txt
+# src; ('a.txt', 'b.txt')
+# dst: c.txt
+# three: ('d.txt', 'e.txt')
+@click.command()
+@click.argument('src', nargs=-1)
+@click.argument('dst', nargs=1)
+@click.argument('three', nargs=2)
+def copy(src, dst, three):
+    """Move file SRC to DST."""
+    print('src;', src)
+    print('dst:', dst)
+    print('three:', three)
+
 if __name__ == '__main__':
-    # hello()
-    cli()
+    hello()
+    # cli()
+    # copy()
 
