@@ -67,6 +67,18 @@ ALTER TABLE table_name DROP PRIMARY KEY
 show index from tblname;
 show keys from tblname;
 ```
+#### 常用sql
+```sql
+-- 添加列
+alter table table_name add column column_name varchar(30);
+-- 删除列
+alter table table_name drop column column_name;
+-- 修改联合主键索引
+alter table table_name drop primary key, add primary key (c1, c2);
+-- 查看mysql的超时时间方法
+show global variables LIKE '%timeout%';
+set global wait_timeout=15000;
+```
 
 ### 2. Error
 1. ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty   (库迁移的时候，因为涉及从集群迁移到单实例)
