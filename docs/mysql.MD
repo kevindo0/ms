@@ -78,14 +78,46 @@ alter table table_name drop primary key, add primary key (c1, c2);
 -- 查看mysql的超时时间方法
 show global variables LIKE '%timeout%';
 set global wait_timeout=15000;
+-- 开启文件记录
+set global general_log=on;
+set global general_log_file='/tmp/mylog.log';
 ```
 
-### 2. Error
-1. ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty   (库迁移的时候，因为涉及从集群迁移到单实例)
+### 2. 知识点
+#### 1. distinct
+一般是用来去除查询结果中的重复记录的
+```sql
+select distinct expression[,expression...] from tables [where conditions];
+-- 只对一列操作
+select distinct name from user;
+-- 对多列操作
+select distinct name, age from user;
+```
+```python
+sess.query(User.name).all()
+# [('lz',), ('lz',), ('lz',)]
+sess.query(User.name).distinct().all()
+# [('lz',)]
+sess.query(User.name, user.status).all()
+# [('lz', 1), ('lz', 1), ('lz', 2)]
+sess.query(User.name, user.status).distinct().all()
+# [('lz', 1), ('lz', 2)]
+```
+
+### 3. Error
+#### 1. ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty   (库迁移的时候，因为涉及从集群迁移到单实例)
 ```bash
 mysqldump -uroot -p --set-gtid-purged=off -d sso > sso1.sql
 ```
-2. 用mysqldump备份数据库时出现when using LOCK TABLES
+#### 2. 用mysqldump备份数据库时出现when using LOCK TABLES
 ```bash
 mysqldump uroot -p --skip-lock-tables d sso  > sso2.sql
+```
+#### 3. 插入表情出错
+Incorrect string value: '\\xF0\\x9F\\x90\\xB2'
+```sql
+-- 查看表中字段字符集
+show full columns from user;
+-- 编码方式修改成utf8mb4
+alter table user modify column name varchar(50) character set utf8mb4 collate utf8mb4_unicode_ci;
 ```

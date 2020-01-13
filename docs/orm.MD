@@ -1,3 +1,80 @@
+### 1. 知识点
+#### 1. deferred
+This feature is useful when one wants to avoid loading a large text or binary field into memory when it’s not needed.
+```python
+from sqlalchemy.orm import deferred, defer, undefer
+from sqlalchemy import Integer, String, Text, Column
+class Book(Base):
+    __tablename__ = 'book'
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    summary = Column(String(2000))
+    excerpt = deferred(Column(Text))
+# ELECT book.id AS book_id, book.title AS book_title, book.summary AS book_summary FROM book LIMIT 1;
+book = sess.query(Book).first()
+# SELECT book.excerpt AS book_excerpt FROM book WHERE book.id = 1;
+print(book.excerpt)
+# SELECT book.excerpt AS book_excerpt, book.id AS book_id, book.title AS book_title FROM book;
+sess.query(Book).options(defer('summary'), undefer('excerpt')).all()
+from sqlalchemy.orm import load_only
+# SELECT book.id AS book_id, book.summary AS book_summary FROM book LIMIT 1;
+s = sess.query(Book).options(load_only("summary")).first()
+# SELECT book.excerpt AS book_excerpt, book.title AS book_title FROM book WHERE book.id = 1;
+s.title
+```
+#### 2. [Hybrid Attributes](https://docs.sqlalchemy.org/en/13/orm/extensions/hybrid.html?highlight=hybrid_property#sqlalchemy.ext.hybrid.hybrid_property)
+```python
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+class Interval(Base):
+    __tablename__ = 'interval'
+    id = Column(Integer, primary_key=True)
+    start = Column(Integer, nullable=False)
+    end = Column(Integer, nullable=False)
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+    def __repr__(self):
+        return f'start: {self.start}, end: {self.end}'
+        
+    @hybrid_property
+    def length(self):
+        return self.end - self.start
+
+    @length.setter
+    def length(self, value):
+        self.end = self.start + value
+
+    @length.update_expression
+    def length(cls, value):
+        return [
+            (cls.end, cls.start + value)
+        ]
+
+    @hybrid_method
+    def contains(self, point):
+        return (self.start <= point) & (point <= self.end)
+
+    @hybrid_method
+    def intersects(self, other):
+        return self.contains(other.start) | self.contains(other.end)
+# SELECT `interval`.id AS interval_id, `interval`.start AS interval_start, `interval`.end AS interval_end FROM `interval` WHERE `interval`.end - `interval`.start > 10;
+sess.query(Interval).filter(Interval.length > 10)
+sess.query(Interval).filter_by(length=5)
+# UPDATE `interval` SET end=(`interval`.start + 25)
+sess.query(Interval).update({Interval.length: 25}, synchronize_session='fetch')
+# UPDATE `interval` SET end=(`interval`.start + 25) WHERE `interval`.end - `interval`.start = 6
+sess.query(Interval).filter_by(length=6).update({Interval.length: 25}, synchronize_session='fetch')
+```
+####3. orm.Bundles
+绑定包可用于查询同一名称空间下的列组。
+```python
+from sqlalchemy.orm import Bundle
+bn = Bundle('mybundle', MyClass.data1, MyClass.data2)
+for row in session.query(bn).filter(bn.c.data1 == 'd1'):
+    print(row.mybundle.data1, row.mybundle.data2)
+```
+
+### 2. 问题解决
 #### 1. 如何声明包含多列主键的表类
 ```python
 # 如果列的声明顺序与它们在主键中的顺序相同
