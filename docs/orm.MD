@@ -66,7 +66,7 @@ sess.query(Interval).update({Interval.length: 25}, synchronize_session='fetch')
 # UPDATE `interval` SET end=(`interval`.start + 25) WHERE `interval`.end - `interval`.start = 6
 sess.query(Interval).filter_by(length=6).update({Interval.length: 25}, synchronize_session='fetch')
 ```
-####3. orm.Bundles
+#### 3. orm.Bundles
 绑定包可用于查询同一名称空间下的列组。
 ```python
 from sqlalchemy.orm import Bundle
@@ -74,7 +74,7 @@ bn = Bundle('mybundle', MyClass.data1, MyClass.data2)
 for row in session.query(bn).filter(bn.c.data1 == 'd1'):
     print(row.mybundle.data1, row.mybundle.data2)
 ```
-####4. [Baked Queries](https://docs.sqlalchemy.org/en/13/orm/extensions/baked.html)
+#### 4. [Baked Queries](https://docs.sqlalchemy.org/en/13/orm/extensions/baked.html)
 预查询
 ```python
 from sqlalchemy.ext import baked
@@ -87,7 +87,7 @@ baked_query += lambda q: q.filter(User.status == bindparam('status'))
 # SELECT user.id AS user_id, user.name AS user_name, user.status AS user_status FROM user WHERE user.name = 'zl'
 result = baked_query(sess).params(name=name, status=status).all()
 ```
-####5. func
+#### 5. func
 ```python
 from sqlalchemy import func
 # SELECT user.id AS user_id, concat(user.name, user.address) AS pp FROM user LIMIT 1;
