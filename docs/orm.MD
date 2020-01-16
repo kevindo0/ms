@@ -19,6 +19,7 @@ sess.query(Book).options(defer('summary'), undefer('excerpt')).all()
 from sqlalchemy.orm import load_only
 # SELECT book.id AS book_id, book.summary AS book_summary FROM book LIMIT 1;
 s = sess.query(Book).options(load_only("summary")).first()
+s = sess.query(Book).options(load_only("summary", "title")).first()
 # SELECT book.excerpt AS book_excerpt, book.title AS book_title FROM book WHERE book.id = 1;
 s.title
 ```
@@ -72,6 +73,41 @@ from sqlalchemy.orm import Bundle
 bn = Bundle('mybundle', MyClass.data1, MyClass.data2)
 for row in session.query(bn).filter(bn.c.data1 == 'd1'):
     print(row.mybundle.data1, row.mybundle.data2)
+```
+####4. [Baked Queries](https://docs.sqlalchemy.org/en/13/orm/extensions/baked.html)
+预查询
+```python
+from sqlalchemy.ext import baked
+from sqlalchemy import bindparam
+bakery = baked.bakery()
+baked_query = bakery(lambda session: session.query(User))
+baked_query += lambda q: q.filter(User.name == bindparam('name'))
+baked_query += lambda q: q.order_by(User.id)
+baked_query += lambda q: q.filter(User.status == bindparam('status'))
+# SELECT user.id AS user_id, user.name AS user_name, user.status AS user_status FROM user WHERE user.name = 'zl'
+result = baked_query(sess).params(name=name, status=status).all()
+```
+####5. func
+```python
+from sqlalchemy import func
+# SELECT user.id AS user_id, concat(user.name, user.address) AS pp FROM user LIMIT 1;
+a = sess.query(User.id, func.concat(User.name, User.address).label('pp')).first()
+print(a._fields)    # ('id', 'pp')
+print(a.pp)         # 'lzshanghai'
+print(a._asdict())  # {'id': '1', 'pp': 'lzshanghai'}
+#   SELECT user.id AS user_id, concat_ws('-', user.name, user.address) AS pp FROM user LIMIT 1;
+a = sess.query(User.id, func.concat_ws('-', User.name, User.address).label('pp')).first()
+print(a.pp)         # 'lz-shanghai'
+
+# SELECT user.name AS user_name, group_concat(user.id, user.address, user.status) AS group_concat_1 FROM user GROUP BY user.name
+sess.query(User.name, func.group_concat(User.id, User.address, User.status)).group_by(User.name).all()
+# [('chao', '3xian5,4wuhan6'), ('lz', '1shanghai1'), ('xiao', '2beijing3')]
+# SELECT user.name AS user_name, group_concat(concat_ws('-', user.id, user.address, user.status)) AS group_concat_1 FROM user GROUP BY user.name
+sess.query(User.name, func.group_concat(func.concat_ws('-', User.id, User.address, User.status))).group_by(User.name).all()
+# [('chao', '3-xian-5,4-wuhan-6'), ('lz', '1-shanghai-1'), ('xiao', '2-beijing-3')]
+
+# SELECT user.id AS user_id, user.name AS user_name, user.address AS user_address, user.status AS user_status FROM user WHERE concat_ws(' ', user.name, user.address) LIKE '%sh%'
+sess.query(User).filter(func.concat_ws(' ', User.name, User.address).like('%sh%')).all()
 ```
 
 ### 2. 问题解决
