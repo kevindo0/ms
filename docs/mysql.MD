@@ -121,3 +121,9 @@ show full columns from user;
 -- 编码方式修改成utf8mb4
 alter table user modify column name varchar(50) character set utf8mb4 collate utf8mb4_unicode_ci;
 ```
+#### 4. 报错cannot add foreign key constraint
+创建外键错误的原因大概有一下几个原因：
+
+1. 关联的两个字段的字段的类型不一致
+2. 设置外键删除时set null
+3. 两张表的引擎不一致

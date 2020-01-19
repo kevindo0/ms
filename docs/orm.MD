@@ -109,6 +109,221 @@ sess.query(User.name, func.group_concat(func.concat_ws('-', User.id, User.addres
 # SELECT user.id AS user_id, user.name AS user_name, user.address AS user_address, user.status AS user_status FROM user WHERE concat_ws(' ', user.name, user.address) LIKE '%sh%'
 sess.query(User).filter(func.concat_ws(' ', User.name, User.address).like('%sh%')).all()
 ```
+#### 6. relationship
+* backref: 反向引用
+* order_by: list中对象的排序依据
+
+一对多：
+```py
+class Grade(Base):
+    
+    __tablename__ = "grade"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(32), nullable=False)
+    users = relationship("User", order_by='User.status')
+    def __repr__(self):
+        return f"<Grade(id:{self.id} name:{self.name})>"
+
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False)
+    status = Column(Integer)
+    grade_id = Column(Integer, ForeignKey('grade.id'))
+    grade = relationship("Grade", backref='user_of_grade')
+    def __repr__(self):
+        return f"<User(name:{self.name}, status:{self.status})>"
+```
+多对多：
+```py
+association_table = Table('association',Base.metadata,
+    Column('course_id', Integer, ForeignKey('course.id')),
+    Column('student_id', Integer, ForeignKey('student.id'))
+)
+
+class Course(Base):
+    __tablename__ = 'course'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    student = relationship("Student", secondary=association_table, backref='course')
+
+    def __repr__(self):
+        return f"<Course(id:{self.id}, name:{self.name})>"
+
+class Student(Base):
+    __tablename__ = 'student'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    def __repr__(self):
+        return f"<Student(id:{self.id}, name:{self.name})>"
+# 添加数据
+s1 = Student(name = 's1')
+s2 = Student(name = 's2')
+c1 = Course(name = 'c1')
+c2 = Course(name = 'c2')
+c1.student = [s1, s2]
+c2.student = [s1, s2]
+session.add(c1)
+session.add(c2)
+session.commit()
+# SELECT student.id AS student_id, student.name AS student_name FROM student WHERE student.name = 's1' LIMIT 1
+a = sess.query(Student).filter_by(name='s1').first()
+print(a)   # <Student(id:3, name:s1)>
+# SELECT course.id AS course_id, course.name AS course_name FROM course, association WHERE 3 = association.student_id AND course.id = association.course_id
+b = a.course
+print(b)    # [<Course(id:3, name:c1)>, <Course(id:4, name:c2)>]
+
+# SELECT course.id AS course_id, course.name AS course_name FROM course WHERE course.name = 'c2' LIMIT 1
+a = sess.query(Course).filter_by(name='c2').first()
+# SELECT student.id AS student_id, student.name AS student_name FROM student, association WHERE 4 = association.course_id AND student.id = association.student_id
+b = a.student
+print(b)    # [<Student(id:3, name:s1)>, <Student(id:4, name:s2)>]
+```
+[cascade](https://www.cnblogs.com/zhongyehai/p/11816921.html):
+1. save-update：默认选项，在添加一条数据的时候，会把其他和次数据关联的数据都添加到数据库中，这种行为就是save-update属性决定的.
+2. delete：表示当删除某一个模型中的数据的时候，也删除掉使用relationship和此数据关联的数据
+3. delete-orphan：表示当对一个ORM对象解除了父表中的关联对象的时候，自己便会被删除，如果父表的数据被删除，同样自己也会被删除，这个选项只能用在一对多上，不能用在多对多和多对一上，并且使用的时候还需要在子模型的relationship中增加参数：single_parent=True，前提relationship的cascade需有delete属性
+4. merge(合并)：默认选项，当在使用sess.merge合并一个对象的时候，会将使用了relationship相关联的对象也进行merge操作
+5. expunge：移除操作的时候，会将相关联的对象也进行移除，这个操作只是从session中移除，并不会正则从数据库删除，与session.add
+6. all：对 save-update、merge、refresh-expire、expunge、delete 这几种的缩写
+```py
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), nullable=False)
+
+    def __repr__(self):
+        return f'<User(id:{self.id}, username:{self.username})>'
+class Article(Base):
+    __tablename__ = 'article'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(50), nullable=False)
+    uid = Column(Integer, ForeignKey('user.id'))
+    author = relationship('User', backref='article')
+
+    def __repr__(self):
+        return f'<Article(id:{self.id}, title:{self.title}),author:{self.author}>'
+user = User(username='aaa')
+article = Article(title='title1')
+article.author = user
+session.add(article)
+# INSERT INTO user (username) VALUES ('aa')
+# INSERT INTO article (title, uid) VALUES ('title1', 1)
+session.commit()
+
+# 将cascade的值设为空，则不会将模型关系映射成功
+# 【 author = relationship('User', backref='article', cascade='')】
+user = User(username='bbb')
+article = Article(title='title2')
+article.author = user
+session.add(article)
+# INSERT INTO article (title, uid) VALUES ('title2', 1)
+session.commit()
+
+# *********************************************
+# 删除article，此时对应的user信息也会被删除
+# 【 author = relationship('User', backref='article', cascade=cascade='save-update,delete')】
+user = User(username='aaa')
+article = Article(title='title1')
+article.author = user
+session.add(article)
+# INSERT INTO user (username) VALUES ('aaa')
+# INSERT INTO article (title, uid) VALUES ('title1', 2)
+session.commit()
+# SELECT article.id AS article_id, article.title AS article_title, article.uid AS article_uid FROM article LIMIT 1
+a = sess.query(Article).first()
+print(a)   # <Article(id:3, title:title1),author:<User(id:2, username:aaa)>>
+sess.delete(a)
+# DELETE FROM article WHERE article.id = 3
+# DELETE FROM user WHERE user.id = 2
+sess.commit()
+# 同理也可以在user表下做同样设置
+class User(Base):
+    __tablename__ = 'user'
+    # ...
+    article = relationship('Article', cascade='save-update,delete')
+class Article(Base):
+    __tablename__ = 'article'
+    # ...
+    author = relationship('User', cascade='save-update,delete')
+
+# delete-orphan 测试
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), nullable=False)
+class Article(Base):
+    __tablename__ = 'article'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(50), nullable=False)
+    uid = Column(Integer, ForeignKey('user.id'))
+    author = relationship('User', backref=backref('article', cascade='save-update,delete,delete-orphan'),
+        cascade='save-update,delete', single_parent=True)
+user = User(username='aaa')
+article = Article(title='title1')
+article.author = user
+session.add(article)
+session.commit()
+a = sess.query(User).first()
+print(a)
+# 将user下的article置为空，则article表中的数据会为空，由于设置了delete-orphan属性，为空的数据会被删除
+# SELECT article.id AS article_id, article.title AS article_title, article.uid AS article_uid FROM article WHERE 3 = article.uid
+a.article = []
+sess.commit()
+# *******************************
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), nullable=False)
+class Article(Base):
+    __tablename__ = 'article'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(50), nullable=False)
+    uid = Column(Integer, ForeignKey('user.id'))
+    author = relationship('User', backref=backref('article', cascade='save-update,delete,delete-orphan,merge'),
+        cascade='save-update,delete', single_parent=True)
+user = User(username='aaa')
+article = Article(title='title1')
+article.author = user
+session.add(article)
+session.commit()
+a = sess.query(User).first()
+user = User(id=1, username='bbb')
+article = Article(id=1, title='xxxxxx')
+user.article.append(article)
+sess.merge(user)
+sess.commit()
+a = User(id=4, username='aa')
+b = Article(id=7, title='xxyyy')
+# select * from article;
+# +----+-----------+-----+
+# | id | title     | uid |
+# +----+-----------+-----+
+# | 7  | xxxxxx111 | 4   |
+# | 8  | 222       | 4   |
+# | 9  | xxxxx444  | 4   |
+# +----+-----------+-----+
+a.article.append(b)
+# UPDATE article SET title='xxyyy' WHERE article.id = 7
+# DELETE FROM article WHERE article.id = 8
+# DELETE FROM article WHERE article.id = 9
+sess.commit()
+# +----+-----------+-----+
+# | id | title     | uid |
+# +----+-----------+-----+
+# | 7  | xxyyy     | 4   |
+# +----+-----------+-----+
+# **************************
+a = User(username='aaa')
+b = Article(title='title1')
+a.author = b
+sess.add(b)
+sess.expunge(b)
+# INSERT INTO user (username) VALUES ('aaa')
+sess.commit()
+```
+
 
 ### 2. 问题解决
 #### 1. 如何声明包含多列主键的表类
