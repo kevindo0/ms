@@ -23,7 +23,7 @@ jupyterhub -f /etc/jupyterlab/jupyterhub_config.py
 useradd -m duchao
 passwd duchao
 ```
-jupyterhub_config.py
+#### 2. jupyterhub_config.py
 
 * [CAS](https://github.com/cwaldbieser/jhub_cas_authenticator)
 ```bash
@@ -39,8 +39,23 @@ c.CASAuthenticator.cas_service_url = ''
 c.CASAuthenticator.cas_login_url = ''
 c.CASAuthenticator.cas_service_validate_url = ''
 ```
+#### 3. [jupyter widgets](https://ipywidgets.readthedocs.io/en/latest/index.html)
+```bash
+pip install ipywidgets
+jupyter nbextension enable --py widgetsnbextension
+# install the labextension
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+# 重启jupyterhub
 
-### 2. an
+# 查看
+jupyter labextension list
+# JupyterLab v1.2.5
+# Known labextensions:
+#    app dir: /usr/local/share/jupyter/lab
+#         @jupyter-widgets/jupyterlab-manager v1.1.0  enabled  OK
+```
+
+### 2. anocoda
 ```bash
 conda list  # 查看安装了哪些包。
 conda env list 或 conda info -e  # 查看当前存在哪些虚拟环境
