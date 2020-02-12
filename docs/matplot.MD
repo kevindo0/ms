@@ -11,7 +11,7 @@ print(fm)
 # 获取缓存目录
 print(fm.get_cachedir())
 # 配置文件地址
-print(matplotlib.matplotlib_fname())
+i
 # /home/duchao/.cache/matplotlib
 # /usr/local/lib/python3.5/dist-packages/matplotlib/mpl-data/matplotlibrc
 ```
@@ -20,6 +20,8 @@ print(matplotlib.matplotlib_fname())
 4. 删除缓存字体
 ```bash
 rm -rf /home/duchao/.cache/matplotlib
+# 查找并删除所有的缓存
+find /home/*/.cache/* -maxdepth 3 -name matplotlib | xargs rm -rf
 ```
 5. 修改配置文件
 ```bash
