@@ -11,7 +11,7 @@ print(fm)
 # 获取缓存目录
 print(fm.get_cachedir())
 # 配置文件地址
-i
+print(matplotlib.matplotlib_fname())
 # /home/duchao/.cache/matplotlib
 # /usr/local/lib/python3.5/dist-packages/matplotlib/mpl-data/matplotlibrc
 ```

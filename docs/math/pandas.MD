@@ -90,7 +90,7 @@ df.cumsum(axis=1)
 # 2  7  15  24
 ```
 ### 4. other
-#### 1. DataFrame.assign(self, \*\*kwargs) → DataFrame
+#### 1. DataFrame.**assign**(self, \*\*kwargs) → DataFrame
 将新列重新分配给DataFrame
 ```py
 df = pd.DataFrame([[1, 2, 3], [4, 5, 6]], columns=['a', 'b', 'c'])
@@ -107,7 +107,7 @@ df.assign(s = lambda x:x.b + 100, p = lambda x: x['s'] + 200)
 # 0  1  2  3  102  302
 # 1  4  5  6  105  305
 ```
-#### 2. DataFrame.mask(self, cond, other=nan, inplace=False, axis=None, level=None, errors='raise', try_cast=False)
+#### 2. DataFrame.**mask**(self, cond, other=nan, inplace=False, axis=None, level=None, errors='raise', try_cast=False)
 Replace values where the condition is True.
 ```py
 df = pd.DataFrame([[1, 2, 3], [4, 5, 6]], columns=['a', 'b', 'c'])
@@ -120,7 +120,7 @@ df.mask(df % 2 == 0, -df)
 # 0  1 -2  3
 # 1 -4  5 -6
 ```
-#### 3. DataFrame.where(self, cond, other=nan, inplace=False, axis=None, level=None, errors='raise', try_cast=False)
+#### 3. DataFrame.**where**(self, cond, other=nan, inplace=False, axis=None, level=None, errors='raise', try_cast=False)
 Replace values where the condition is False.
 ```py
 df.where(df % 3 == 2, -9)
@@ -131,5 +131,20 @@ df.where(df % 3 == 2, -df)
 #    a  b  c
 # 0 -1  2 -3
 # 1 -4  5 -6
+```
+#### 4. DataFrame.**query**(self, expr, inplace=False, \*\*kwargs)
+使用布尔表达式查询DataFrame的列
+```py
+df = pd.DataFrame({'A': range(1, 6),
+                   'B': range(10, 0, -2),
+                   'C C': range(10, 5, -1)})
+df.query('A > B')
+df[df.A > df.B]
+#    A  B  C C
+# 4  5  2    6
+df.query('B == `C C`')
+df[df.B == df['C C']]
+#    A   B  C C
+# 0  1  10   10
 ```
 

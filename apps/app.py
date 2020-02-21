@@ -1,10 +1,10 @@
-from flask import Flask
+from flask import Flask, request
 from dynaconf import settings
 
 def _register_blueprint(app):
-    from apps.ptest.views import test_bp
+    from apps.ptest.views import ptest_bp
     
-    app.register_blueprint(test_bp, url_prefix='/test')
+    app.register_blueprint(ptest_bp, url_prefix='/ptest')
 
 def create_app():
     app = Flask(__name__)
@@ -14,22 +14,21 @@ def create_app():
     _register_blueprint(app)
 
     # session
-    app.permanent_session_lifetime = timedelta(seconds=config['session']['expire'])
-    app.session_interface = RedisSessionInterface(redis=predis, prefix=config['session']['redis_prefix'])
+    # app.permanent_session_lifetime = timedelta(seconds=config['session']['expire'])
+    # app.session_interface = RedisSessionInterface(redis=predis, prefix=config['session']['redis_prefix'])
 
-    if config['debug']:
-        @app.after_request
-        def cors_headers(response):
-            origin = request.headers.get('Origin')
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Max-Age"] = sys.maxsize
-            response.headers[
-                "Access-Control-Allow-Headers"] = "authorization,Access-Control-Allow-Origin,Content-Type,Cookie,Connection,Accept-Language,Accept-Encoding,Accept,User-Agent,Host,Accept-Charset"
-            response.headers[
-                "Access-Control-Allow-Methods"] = "GET,POST,PATCH,OPTIONS,DELETE,PUT"
-            response.headers[
-                "Access-Control-Allow-Origin"] = origin
-            return response
+    @app.after_request
+    def cors_headers(response):
+        origin = request.headers.get('Origin')
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Max-Age"] = sys.maxsize
+        response.headers[
+            "Access-Control-Allow-Headers"] = "authorization,Access-Control-Allow-Origin,Content-Type,Cookie,Connection,Accept-Language,Accept-Encoding,Accept,User-Agent,Host,Accept-Charset"
+        response.headers[
+            "Access-Control-Allow-Methods"] = "GET,POST,PATCH,OPTIONS,DELETE,PUT"
+        response.headers[
+            "Access-Control-Allow-Origin"] = origin
+        return response
 
     @app.errorhandler(HttpException)
     def http_exception(error):
