@@ -460,6 +460,48 @@ class User(Base):
 stmt = sess.query(User.city.label('city'), User.age.label('age1')).filter(username='user1').subquery()
 users = sess.query(User).filter(User.city==stmt.c.city, User.age==stmt.c.age1).all()
 ```
+#### 14. 同列分类求和并按其他列分组
+| userid     | type   |  income  |
+| --------   | -----:  | :----:  |
+| 1        | 微信      |   4     |
+| 2        |  支付宝   |   2   |
+| 2        |  微信     |   6  |
+| 1        | 支付宝     |   7     |
+
+```py
+sess.query(INCOME.userid,
+    func.sum(case([(INCOME.type=='微信',INCOME.income)],else_=0)).label('income_wx'),
+    func.sum(case([(INCOME.type=='支付宝',INCOME.income)],else_=0)).label('income_ali'),
+    ).group_by(INCOME.userid).all()
+# sql 
+# SELECT userid,
+#     SUM(CASE WHEN type='微信' THEN income ELSE 0 END) AS income_wx,
+#     SUM(CASE WHEN type='支付宝' THEN income ELSE 0 END) AS income_ali
+# FROM INCOME GROUP BY userid
+```
+#### 15. count, nullif
+| id | username | city     | age | deleted |
+| -----| -----  | :----:  | ----:  | ----  |
+| 1  | user1    | bei      | 18  | <null>  |
+| 2  | user2    | bei      | 18  | <null>  |
+| 3  | user3    | 上海     | 18  | <null>  |
+| 4  | user4    | bei      | 26  | <null>  |
+| 5  | user5    | bei      | 20  | 1       |
+| 6  | user6    | shanghai | 20  | 1       |
+
+```py
+sess.query(User.age, func.count(func.nullif(User.deleted.is_(None), 0)).label('d')).group_by(User.age).all()
+# [(18, 3), (20, 0), (26, 1)]
+# SELECT user.age AS user_age, count(nullif(user.deleted IS NULL, 0)) AS d FROM user GROUP BY user.age; 
+
+sess.query(User.age, func.count(func.nullif(User.deleted.is_(None), 1)).label('d1')).group_by(User.age).all()
+# [(18, 0), (20, 2), (26, 0)]
+# SELECT user.age AS user_age, count(nullif(user.deleted IS NULL, 1)) AS d FROM user GROUP BY user.age; 
+
+sess.query(User.age, func.count(func.nullif(User.deleted.is_(None), 2)).label('d1')).group_by(User.age).all()
+# [(18, 3), (20, 2), (26, 1)]
+# SELECT user.age AS user_age, count(nullif(user.deleted IS NULL, 2)) AS d FROM user GROUP BY user.age; 
+```
 
 ### 2. 问题解决
 #### 1. 如何声明包含多列主键的表类

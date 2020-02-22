@@ -103,6 +103,21 @@ sess.query(User.name, user.status).all()
 sess.query(User.name, user.status).distinct().all()
 # [('lz', 1), ('lz', 2)]
 ```
+#### 2. ifnull, nullif, isnull
+1. IFNULL(expr1,expr2) 假如expr1不为NULL，返回值为expr1; 否则其返回值为 expr2。IFNULL()的返回值是数字或是字符串
+2. ISNULL(expr) 如expr 为null，那么isnull() 的返回值为 1，否则返回值为 0
+3. NULLIF(expr1,expr2) 如果expr1 = expr2 成立，那么返回值为NULL，否则返回值为expr1，这和CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END相同
+```sql
+SELECT IFNULL(1, 0);        -- 1
+SELECT IFNULL(NULL,10);     -- 10
+SELECT IFNULL(1/0,'yes');   -- 'yes'
+
+SELECT ISNULL(1 + 1);       -- 0
+SELECT ISNULL(1/0);         -- 1
+
+SELECT NULLIF(1,1);         -- null
+SELECT NULLIF(1,2);         -- 1
+```
 
 ### 3. Error
 #### 1. ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty   (库迁移的时候，因为涉及从集群迁移到单实例)

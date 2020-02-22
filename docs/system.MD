@@ -14,7 +14,7 @@ useradd -m duchao
 # 添加组
 groupadd gname
 # 将人员添加进组 append
-usermaod -a -G gname duchao
+usermod -a -G gname duchao
 gpasswd -a duchao
 # 将人员移除出组 
 gpasswd -d duchao

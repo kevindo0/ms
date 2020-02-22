@@ -8,7 +8,7 @@ from apps.utils import exceptions
 
 
 class JwtSerial:
-
+    # 对称加密解密
     def __init__(self):
         jwt_env = settings.from_env('jwt')
         self.serial = serial(secret_key=jwt_env['secret-key'],
@@ -28,6 +28,7 @@ class JwtSerial:
 
 
 class JwtRSA:
+    # 非对称加密解密
     def __init__(self):
         jwt_env = settings.from_env('jwt')
         with open(jwt_env['private_key']) as f:
@@ -45,4 +46,3 @@ class JwtRSA:
             logger.error(ex)
             raise exceptions.TokenBad(info=ex)
         return res
-

@@ -1,5 +1,8 @@
 ### ms
 ```bash
+# 公钥私钥生成
+openssl genrsa -out sk.pem 1024
+openssl rsa -in sk.pem -pubout -out pk.pem
 # jwt
 pip install pyjwt
 pip install pyjwt[crypto]
