@@ -1,0 +1,1 @@
+from .groupuser import GroupUser    # noqa

@@ -1,5 +1,3 @@
-import functools
-
 import jwt
 from dynaconf import settings
 from itsdangerous import TimedJSONWebSignatureSerializer as serial

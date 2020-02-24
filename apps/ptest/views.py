@@ -6,6 +6,7 @@ from . import controller
 
 ptest_bp = Blueprint('ptest_bp', __name__)
 
+
 @ptest_bp.route('/test', methods=['GET', 'POST'])
 def test_test():
     method = request.method

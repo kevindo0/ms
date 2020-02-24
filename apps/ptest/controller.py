@@ -5,6 +5,7 @@ def c_get_test(params):
         'message': res
     }
 
+
 def c_post_test(data):
     return {
         'code': 0,

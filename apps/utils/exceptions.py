@@ -2,6 +2,10 @@ error_dict = {
     'TokenBad': {
         'code': 1103,
         'message': '{info}'
+    },
+    'MysqlError': {
+        'code': 9001,
+        'message': 'mysql error'
     }
 }
 
