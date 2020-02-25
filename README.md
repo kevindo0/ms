@@ -12,3 +12,4 @@ pip install pyjwt[crypto]
 * [httpie](https://github.com/jakubroztocil/httpie.git)
 * [apidoc](https://apidocjs.com/)
 * [pyjwt](https://pyjwt.readthedocs.io/en/latest/installation.html)
+* [cerberus 参数验证](https://github.com/pyeve/cerberus)

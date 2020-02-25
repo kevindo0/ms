@@ -3,6 +3,10 @@ error_dict = {
         'code': 1103,
         'message': '{info}'
     },
+    'ParamsError': {
+        'code': 1104,
+        'message': '{info}'
+    },
     'MysqlError': {
         'code': 9001,
         'message': 'mysql error'
