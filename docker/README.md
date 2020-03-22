@@ -1,3 +1,14 @@
+### Docker Install
+#### [Centos](https://docs.docker.com/install/linux/docker-ce/centos)
+```bash
+yum install -y yum-utils device-mapper-persistent-data lvm2
+# 设置Docker的存储库
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y docker-ce
+systemctl daemon-reload && systemctl start docker
+docker version
+```
+
 ### Ubuntu Tools
 ```
 apt-get install -y tree

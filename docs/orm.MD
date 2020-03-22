@@ -446,6 +446,8 @@ for x in range(1):
 session.commit()
 # SELECT user.username AS user_username, count(article.id) AS count_1 FROM user INNER JOIN article ON user.id = article.uid GROUP BY user.id
 sess.query(User.username, func.count(Article.id)).join(Article, User.id==Article.uid).group_by(User.id).all()
+# SELECT user.username AS user_username, count(article.id) AS count_1 FROM user LEFT OUTER JOIN article ON user.id = article.uid GROUP BY user.id
+sess.query(User.username, func.count(Article.id)).outerjoin(Article, User.id==Article.uid).group_by(User.id).all()
 ```
 #### 11. subquery
 ```py

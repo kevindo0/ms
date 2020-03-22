@@ -67,7 +67,7 @@ ALTER TABLE table_name DROP PRIMARY KEY
 show index from tblname;
 show keys from tblname;
 ```
-#### 常用sql
+#### 6.常用sql
 ```sql
 -- 添加列
 alter table table_name add column column_name varchar(30);
@@ -118,6 +118,55 @@ SELECT ISNULL(1/0);         -- 1
 SELECT NULLIF(1,1);         -- null
 SELECT NULLIF(1,2);         -- 1
 ```
+#### 3. join, left join, right join
+* inner join: 就是求两个表的交集，从笛卡尔积的角度讲就是从笛卡尔积中挑出ON子句条件成立的记录。
+* left join: 就是求两个表A表和B表的交集外加左表剩下的数据。依旧从笛卡尔积的角度讲，就是先从笛卡尔积中挑出ON子句条件成立的记录，然后加上左表A表中剩余的记录
+* right join: 就是求两个表A和B表的交集外加右表B剩下的数据
+```sql
+select * from kemu;
+select * from score;
+-- +----+---------+     +----+-------+
+-- | id | kemu    |     | id | score |
+-- +----+---------+     +----+-------+
+-- | 1  | math    |     | 2  | 70    |
+-- | 2  | chinese |     | 3  | 80    |
+-- | 3  | english |     | 4  | 90    |
+-- +----+---------+     +----+-------+
+select * from kemu left join score on kemu.id = score.id; 
+-- +----+---------+--------+--------+
+-- | id | kemu    | id     | score  |
+-- +----+---------+--------+--------+
+-- | 2  | chinese | 2      | 70     |
+-- | 3  | english | 3      | 80     |
+-- | 1  | math    | <null> | <null> |
+-- +----+---------+--------+--------+
+select * from kemu right join score on kemu.id = score.id;
+-- +--------+---------+----+-------+
+-- | id     | kemu    | id | score |
+-- +--------+---------+----+-------+
+-- | 2      | chinese | 2  | 70    |
+-- | 3      | english | 3  | 80    |
+-- | <null> | <null>  | 4  | 90    |
+-- +--------+---------+----+-------+
+select * from kemu join score on kemu.id = score.id;
+-- +----+---------+----+-------+
+-- | id | kemu    | id | score |
+-- +----+---------+----+-------+
+-- | 2  | chinese | 2  | 70    |
+-- | 3  | english | 3  | 80    |
+-- +----+---------+----+-------+
+```
+#### 4.TRUNCATE(X, D)
+其中，X是数值，D是保留小数的位数，就是按照小数位数，进行数值截取
+```sql
+SELECT TRUNCATE(123.4567, 3);   # 123.456
+SELECT TRUNCATE(123.4567, 2);   # 123.45
+SELECT TRUNCATE(123.4567, 1);   # 123.4
+SELECT TRUNCATE(123.4567, 0);   # 123
+SELECT TRUNCATE(123.4567, -1);  # 120
+SELECT TRUNCATE(123.4567, -2);  # 100
+SELECT TRUNCATE(123.4567, -3);  # 0
+```
 
 ### 3. Error
 #### 1. ERROR 1840 (HY000) at line 24: @@GLOBAL.GTID_PURGED can only be set when @@GLOBAL.GTID_EXECUTED is empty   (库迁移的时候，因为涉及从集群迁移到单实例)
@@ -142,3 +191,9 @@ alter table user modify column name varchar(50) character set utf8mb4 collate ut
 1. 关联的两个字段的字段的类型不一致
 2. 设置外键删除时set null
 3. 两张表的引擎不一致
+
+#### 5. [sql_mode=only_full_group_by"错误解决方案](https://blog.csdn.net/qq_42175986/article/details/82384160)
+```sql
+select @@GLOBAL.sql_mode;
+set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+```
